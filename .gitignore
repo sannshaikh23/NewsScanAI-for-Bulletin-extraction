@@ -43,3 +43,9 @@ Thumbs.db
 
 # Git itself
 .git/
+
+# Environment variables (contains credentials)
+.env
+
+# Cloudinary backup
+cloudinary_urls.json

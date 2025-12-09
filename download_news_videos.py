@@ -121,9 +121,116 @@ def main():
                     file_path = os.path.join(output_dir, file)
                     size_mb = os.path.getsize(file_path) / (1024 * 1024)
                     print(f"  {i}. {file} ({size_mb:.2f} MB)")
+                
+                # Upload to Cloudinary
+                print("\n" + "="*60)
+                print("Uploading videos to Cloudinary...")
+                print("="*60)
+                upload_to_cloudinary(output_dir, files)
     else:
         print("\n✗ Download failed. Please check the error messages above.")
         sys.exit(1)
 
+def upload_to_cloudinary(output_dir, files):
+    """Upload downloaded videos to Cloudinary and add to database"""
+    try:
+        import cloudinary
+        import cloudinary.uploader
+        from dotenv import load_dotenv
+        from db_utils import add_video
+        import json
+        
+        # Load environment variables
+        load_dotenv()
+        
+        # Configure Cloudinary
+        cloudinary.config(
+            cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
+            api_key=os.getenv('CLOUDINARY_API_KEY'),
+            api_secret=os.getenv('CLOUDINARY_API_SECRET')
+        )
+        
+        if not all([os.getenv('CLOUDINARY_CLOUD_NAME'), os.getenv('CLOUDINARY_API_KEY'), os.getenv('CLOUDINARY_API_SECRET')]):
+            print("\n⚠️  Cloudinary credentials not found. Videos saved locally only.")
+            return
+        
+        successful = 0
+        failed = 0
+        
+        # Load existing URL mapping
+        mapping_file = "cloudinary_urls.json"
+        url_mapping = {}
+        if os.path.exists(mapping_file):
+            with open(mapping_file, 'r') as f:
+                url_mapping = json.load(f)
+        
+        for i, file in enumerate(files, 1):
+            file_path = os.path.join(output_dir, file)
+            video_name = os.path.splitext(file)[0]  # Remove .mp4 extension
+            
+            print(f"\n[{i}/{len(files)}] Uploading: {video_name}")
+            
+            try:
+                # Upload to Cloudinary
+                response = cloudinary.uploader.upload(
+                    file_path,
+                    resource_type="video",
+                    public_id=f"videosearch/videos/{video_name}",
+                    folder="videosearch/videos",
+                    overwrite=False,
+                    invalidate=True
+                )
+                
+                cloudinary_url = response['secure_url']
+                url_mapping[video_name] = cloudinary_url
+                
+                print(f"   ✅ Uploaded to Cloudinary")
+                
+                # Add to database
+                add_video(
+                    name=video_name,
+                    path=f"static/videos/{file}",  # Keep local path for reference
+                    is_indexed=False,
+                    frame_count=0,
+                    show_in_samples=False
+                )
+                
+                # Update database with Cloudinary URL
+                import sqlite3
+                conn = sqlite3.connect("videosearch.db")
+                conn.execute(
+                    'UPDATE videos SET cloudinary_url = ? WHERE name = ?',
+                    (cloudinary_url, video_name)
+                )
+                conn.commit()
+                conn.close()
+                
+                print(f"   ✅ Added to database")
+                successful += 1
+                
+            except Exception as e:
+                print(f"   ❌ Failed: {str(e)}")
+                failed += 1
+        
+        # Save updated mapping
+        with open(mapping_file, 'w') as f:
+            json.dump(url_mapping, f, indent=2)
+        
+        print("\n" + "="*60)
+        print(f"📊 Upload Summary:")
+        print(f"   ✅ Successful: {successful}")
+        print(f"   ❌ Failed: {failed}")
+        print("="*60)
+        
+        print("\n💡 Next steps:")
+        print("   1. Run: python process_videos.py (to extract features)")
+        print("   2. Videos are now in Cloudinary and ready to use!")
+        
+    except ImportError as e:
+        print(f"\n⚠️  Missing dependencies: {e}")
+        print("Videos saved locally. Install cloudinary to enable cloud upload:")
+        print("  pip install cloudinary python-dotenv")
+
 if __name__ == '__main__':
     main()
+

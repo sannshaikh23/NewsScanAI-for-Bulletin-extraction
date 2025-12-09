@@ -72,5 +72,24 @@ def get_sample_videos():
     conn.close()
     return videos
 
+def get_video_url(video_name):
+    """Get video URL - returns Cloudinary URL if available, else local path"""
+    conn = get_db_connection()
+    video = conn.execute(
+        'SELECT cloudinary_url, path FROM videos WHERE name = ?', 
+        (video_name,)
+    ).fetchone()
+    conn.close()
+    
+    if video:
+        # Prefer Cloudinary URL if available
+        if video['cloudinary_url']:
+            return video['cloudinary_url']
+        # Fallback to local path
+        return f"/static/videos/{video_name}.mp4"
+    
+    # Default fallback
+    return f"/static/videos/{video_name}.mp4"
+
 if __name__ == "__main__":
     init_db()

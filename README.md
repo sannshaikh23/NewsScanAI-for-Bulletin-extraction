@@ -1,214 +1,303 @@
-# Video Search System
+# News Scan AI for Bulletin Extraction
 
-A content-based video retrieval system that enables searching for similar scenes across multiple videos using image queries. Built with Python, Flask, and computer vision techniques.
+<div align="center">
 
-## Features
+![Python](https://img.shields.io/badge/Python-3.7+-blue.svg)
+![Flask](https://img.shields.io/badge/Flask-2.0+-green.svg)
+![OpenCV](https://img.shields.io/badge/OpenCV-4.0+-red.svg)
+![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
-- 🔍 **Image-based Search**: Upload any image to find similar scenes in your video database
-- 🎬 **Video Playback**: Click on results to play the video at the matching timestamp
-- 📊 **Sample Queries**: Pre-loaded sample images for quick testing
-- 🎯 **Smart Filtering**: Adaptive threshold system to show only relevant results
-- 💾 **Metadata Management**: SQLite database for efficient video organization
-- ⚡ **Fast Retrieval**: Fisher Vector encoding for efficient similarity search
+**An intelligent AI-powered system for searching and extracting news bulletin segments from video archives using advanced computer vision techniques.**
 
-## Technology Stack
+[Features](#-features) • [Demo](#-demo) • [Installation](#-installation) • [Usage](#-usage) • [Documentation](#-documentation)
 
-- **Backend**: Python 3.x, Flask
-- **Computer Vision**: OpenCV (SIFT features)
-- **Machine Learning**: scikit-learn (Gaussian Mixture Models, Fisher Vectors)
-- **Database**: SQLite
-- **Frontend**: HTML5, CSS3, JavaScript (ES6)
-- **Video Processing**: FFmpeg
+</div>
 
-## Prerequisites
+---
 
-### System Requirements
-- Python 3.7 or higher
-- FFmpeg (for video processing)
+## 📋 Table of Contents
 
-### Install FFmpeg on Windows
+- [About](#-about)
+- [Features](#-features)
+- [Demo](#-demo)
+- [Technology Stack](#-technology-stack)
+- [Installation](#-installation)
+- [Quick Start](#-quick-start)
+- [Usage](#-usage)
+- [Project Structure](#-project-structure)
+- [How It Works](#-how-it-works)
+- [Configuration](#-configuration)
+- [Troubleshooting](#-troubleshooting)
+- [Contributing](#-contributing)
+- [License](#-license)
+
+---
+
+## 🎯 About
+
+**News Scan AI for Bulletin Extraction** is an intelligent video search system designed specifically for news organizations and media houses. It enables journalists, editors, and researchers to quickly find specific news segments across large video archives by simply uploading a query image or selecting from sample frames.
+
+The system uses state-of-the-art computer vision algorithms (SIFT features, Fisher Vectors, and Gaussian Mixture Models) to identify visually similar scenes and automatically navigate to the exact timestamp in the video.
+
+---
+
+## ✨ Features
+
+- 🔍 **Image-Based Search** - Upload any image to find similar scenes in your video database
+- 🎬 **Instant Video Playback** - Click on results to play the video at the exact matching timestamp
+- 📊 **Sample Queries** - Pre-loaded sample images for quick testing and demonstration
+- 🎯 **Smart Filtering** - Adaptive threshold system (0.50 minimum) to show only relevant results
+- ⚠️ **User-Friendly Feedback** - Clear "No Matching Videos Found" message for irrelevant queries
+- 💾 **Metadata Management** - SQLite database for efficient video organization
+- ⚡ **Fast Retrieval** - Fisher Vector encoding for efficient similarity search
+- ☁️ **Cloud Storage Support** - Integrated with Cloudinary for scalable video hosting
+- 🎨 **Modern UI** - Clean, responsive web interface with professional styling
+
+---
+
+## 🎥 Demo
+
+### Search Interface
+![Search Interface](static/demo_screenshot.png)
+
+### Search Results
+Upload a query image or select a sample, and the system returns ranked results with similarity scores:
+
+- **Rank #1** - Highest similarity match
+- **Score** - Similarity score (0.0 to 1.0)
+- **Video Preview** - Thumbnail of the matching frame
+- **Click to Play** - Instant video playback at the exact timestamp
+
+---
+
+## 🛠 Technology Stack
+
+| Category | Technologies |
+|----------|-------------|
+| **Backend** | Python 3.7+, Flask |
+| **Computer Vision** | OpenCV (SIFT features) |
+| **Machine Learning** | scikit-learn (GMM, Fisher Vectors) |
+| **Database** | SQLite |
+| **Frontend** | HTML5, CSS3, JavaScript (ES6) |
+| **Video Processing** | FFmpeg |
+| **Cloud Storage** | Cloudinary (optional) |
+
+---
+
+## 📦 Installation
+
+### Prerequisites
+
+- **Python 3.7 or higher**
+- **FFmpeg** (for video processing)
+
+#### Install FFmpeg on Windows
 ```powershell
 winget install FFmpeg
 ```
 
-Or download from: https://ffmpeg.org/download.html
+Or download from: [https://ffmpeg.org/download.html](https://ffmpeg.org/download.html)
 
-## Installation
-
-### 1. Clone or Download the Project
+#### Install FFmpeg on Linux
 ```bash
-cd videosearch-master
+sudo apt-get install ffmpeg
 ```
 
-### 2. Install Python Dependencies
+#### Install FFmpeg on macOS
+```bash
+brew install ffmpeg
+```
+
+### Clone the Repository
+
+```bash
+git clone https://github.com/yourusername/news-scan-ai.git
+cd news-scan-ai
+```
+
+### Install Python Dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
 
-The `requirements.txt` includes:
+**Dependencies include:**
 - opencv-python
 - numpy
 - scikit-learn
 - Flask
 - Pillow
+- cloudinary (optional)
 
-## Usage
+---
 
-### Quick Start (Using Existing Index)
+## 🚀 Quick Start
 
-If the project already has indexed videos in `work_dir/`, you can start the web app immediately:
+### Option 1: Using Existing Index
+
+If the project already has indexed videos in `work_dir/`:
 
 ```bash
 python web_app.py
 ```
 
-Then open your browser to: `http://127.0.0.1:5000`
+Then open your browser to: **http://127.0.0.1:5000**
 
-### Adding New Videos (Admin Workflow)
-
-#### Step 1: Add Video Files
-Place your `.mp4` video files in the `static/videos/` directory:
-
-```bash
-# Example:
-static/videos/my_video.mp4
-```
-
-#### Step 2: Register Videos in Database
-```bash
-python populate_db.py
-```
-
-This scans `static/videos/` and adds new videos to the database.
-
-#### Step 3: Process & Index Videos
-```bash
-python process_videos.py
-```
-
-This command will:
-- Extract keyframes (1 frame per second)
-- Extract SIFT features from each frame
-- Encode features as Fisher Vectors
-- Update the search index
-- Mark videos as "indexed" in the database
-
-**⏱️ Processing Time**: ~2-5 minutes per video (depending on length)
-
-#### Step 4: Restart the Web App
-```bash
-# Stop the running app (Ctrl+C)
-python web_app.py
-```
-
-The new videos are now searchable!
-
-### First-Time Setup (No Existing Index)
+### Option 2: First-Time Setup
 
 If starting from scratch with new videos:
 
 ```bash
-# 1. Add videos to static/videos/
+# 1. Add videos to static/videos/ (or configure Cloudinary)
 
-# 2. Register in database
+# 2. Register videos in database
 python populate_db.py
 
-# 3. Index the videos
+# 3. Process and index videos
 python process_videos.py
 
-# 4. Start the web app
+# 4. Start the web application
 python web_app.py
 ```
 
-## How to Use the Search Interface
+---
 
-### Option 1: Upload Query Image
+## 💡 Usage
+
+### Searching for News Segments
+
+#### Method 1: Upload Query Image
 1. Click **"Upload Query Image"**
-2. Select an image file from your computer
+2. Select an image file (screenshot, photo, or frame)
 3. View results ranked by similarity
 4. Click any result to play the video at that timestamp
 
-### Option 2: Use Sample Images
+#### Method 2: Use Sample Images
 1. Click **"Load Sample Images"**
 2. Click on any sample thumbnail
 3. View results and play videos
 
-### Navigation
-- **Back Button**: Returns to search results (preserves your query)
-- **Replay Button**: Restart video from the matched frame
+### Adding New Videos
 
-## Project Structure
+```bash
+# Step 1: Add video files to static/videos/
+# Example: static/videos/news_bulletin_2024.mp4
+
+# Step 2: Register in database
+python populate_db.py
+
+# Step 3: Process and index
+python process_videos.py
+
+# Step 4: Restart web app
+# Press Ctrl+C to stop, then:
+python web_app.py
+```
+
+**⏱️ Processing Time:** ~2-5 minutes per video (depending on length)
+
+---
+
+## 📁 Project Structure
 
 ```
-videosearch-master/
+news-scan-ai/
 ├── web_app.py              # Main Flask application
 ├── db_utils.py             # Database helper functions
 ├── populate_db.py          # Register videos in database
 ├── process_videos.py       # Automated indexing pipeline
+├── download_news_videos.py # Download videos from YouTube
 ├── requirements.txt        # Python dependencies
-├── README2.md              # This file
-├── PROJECT_DETAILS.md      # Technical documentation
+├── README.md               # This file
+├── videosearch.db          # SQLite database
+├── cloudinary_urls.json    # Video URL mappings
+├── documents/              # Documentation
+│   ├── PROJECT_DETAILS.md  # Technical documentation
+│   ├── cloudinary_guide.md # Cloudinary setup guide
+│   └── algorithmdetails.md # Algorithm details
 ├── templates/              # HTML templates
-│   ├── index.html
-│   └── video_player.html
+│   ├── index.html          # Main search interface
+│   └── video_player.html   # Video playback page
 ├── static/
-│   └── videos/             # Video files (MP4)
+│   └── videos/             # Video files (MP4) - optional if using Cloudinary
 ├── work_dir/               # Generated files
 │   ├── keyframes/          # Extracted frames
 │   ├── features/           # SIFT descriptors
-│   ├── gmm.pickle          # Trained model
-│   └── index.npy           # Search index
+│   ├── gmm.pickle          # Trained Gaussian Mixture Model
+│   └── index.npy           # Search index (Fisher Vectors)
 └── indexer/                # Processing scripts
-    ├── keyframes/
-    ├── local_descriptors/
-    └── global_descriptors/
+    ├── keyframes/          # Keyframe extraction
+    ├── local_descriptors/  # SIFT feature extraction
+    └── global_descriptors/ # Fisher Vector encoding
 ```
 
-## Terminal Commands Reference
+---
 
-### Web Application
-```bash
-# Start the web server
-python web_app.py
+## 🔬 How It Works
 
-# Access the application
-# Open browser: http://127.0.0.1:5000
+### Algorithm Pipeline
 
-# Stop the server
-# Press Ctrl+C in the terminal
+1. **Keyframe Extraction**
+   - Extract frames at 1 FPS from videos using FFmpeg
+   - Store frames in `work_dir/keyframes/`
+
+2. **Feature Extraction**
+   - Extract SIFT (Scale-Invariant Feature Transform) descriptors from each frame
+   - SIFT features are robust to scale, rotation, and illumination changes
+
+3. **Fisher Vector Encoding**
+   - Train a Gaussian Mixture Model (GMM) with 256 components
+   - Encode SIFT descriptors as Fisher Vectors for efficient comparison
+
+4. **Indexing**
+   - Build a searchable index of all Fisher Vectors
+   - Store in `work_dir/index.npy` for fast retrieval
+
+5. **Query Processing**
+   - Extract SIFT features from query image
+   - Encode as Fisher Vector
+   - Compute cosine similarity with all indexed frames
+   - Apply adaptive threshold (0.50 minimum for uploaded images)
+   - Return top matches ranked by similarity
+
+### Similarity Threshold
+
+- **Uploaded Images:** Minimum score of **0.50** (strict filtering)
+- **Sample Images:** Minimum score of **0.30** (relaxed filtering)
+- **No Match:** Displays "⚠️ No Matching Videos Found" message
+
+---
+
+## ⚙️ Configuration
+
+### Environment Variables
+
+Create a `.env` file for Cloudinary configuration (optional):
+
+```env
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
 ```
 
-### Video Management
-```bash
-# Add new videos to database
-python populate_db.py
+### Adjusting Similarity Threshold
 
-# Process pending videos (extract + index)
-python process_videos.py
+Edit `web_app.py` line 139 to adjust the minimum threshold:
 
-# Check database contents
-python -c "from db_utils import get_all_videos; print([v['name'] for v in get_all_videos()])"
+```python
+absolute_min = 0.50  # Adjust between 0.30-0.60
 ```
 
-### Manual Processing (Advanced)
-```bash
-# Extract keyframes only
-python indexer/keyframes/extract_keyframes.py video.mp4 output_dir 1
+- **0.30-0.45:** Lenient (may show some irrelevant results)
+- **0.45-0.50:** Moderate (recommended)
+- **0.50-0.60:** Strict (only very similar images)
 
-# Extract SIFT features only
-python indexer/local_descriptors/extract_sift.py keyframes_dir features_dir
+---
 
-# Train GMM (first time only)
-python indexer/global_descriptors/train_gmm.py features_dir work_dir/gmm.pickle --k 256
-
-# Build search index
-python indexer/global_descriptors/index_dataset.py features_dir work_dir/gmm.pickle work_dir/index.npy
-```
-
-## Troubleshooting
+## 🐛 Troubleshooting
 
 ### Videos Not Playing
-- Ensure videos are in `static/videos/` directory
+- Ensure videos are in `static/videos/` or Cloudinary is configured
 - Check video format (MP4 recommended)
 - Verify FFmpeg is installed: `ffmpeg -version`
 
@@ -226,34 +315,50 @@ pip install -r requirements.txt
 - Install FFmpeg and add to system PATH
 - Verify installation: `ffmpeg -version`
 
-## Performance Tips
+### Low Similarity Scores
+- Use higher quality query images
+- Ensure query image is from the same video or similar scene
+- Adjust threshold in `web_app.py` if needed
 
-- **Faster Indexing**: Process videos in batches during off-hours
-- **Better Results**: Use high-quality query images
-- **Reduce Index Size**: Index only key scenes (modify frame rate)
+---
 
-## Limitations
+## 📚 Documentation
 
-- **Index Loading**: All Fisher Vectors loaded in RAM (limit: ~10,000 frames)
-- **File Format**: Only MP4 videos supported for playback
-- **Processing Time**: ~2-5 minutes per video for indexing
+For detailed technical documentation, see:
+- [DetailsofProject.md](documents/DetailsofProject.md) - Complete project details including architecture, algorithms, cloud integration, and all technical specifications
 
-## Future Enhancements
+---
 
-- [ ] Approximate Nearest Neighbor search (FAISS)
-- [ ] Cloud storage integration (AWS S3, Google Cloud)
-- [ ] Admin UI for video management
-- [ ] Batch upload support
-- [ ] Video thumbnail generation
+## 🤝 Contributing
 
-## Technical Details
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-For in-depth technical documentation, see [PROJECT_DETAILS.md](PROJECT_DETAILS.md)
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## License
+---
 
-This project is provided as-is for educational and research purposes.
+## 📄 License
 
-## Support
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-For issues or questions, check the PROJECT_DETAILS.md for algorithm explanations and architecture diagrams.
+---
+
+## 🙏 Acknowledgments
+
+- Built with OpenCV and scikit-learn
+- Inspired by modern content-based image retrieval systems
+- Designed for news organizations and media professionals
+
+---
+
+<div align="center">
+
+**Made with ❤️ for News Organizations**
+
+[⬆ Back to Top](#news-scan-ai-for-bulletin-extraction)
+
+</div>

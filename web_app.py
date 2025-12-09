@@ -133,9 +133,13 @@ def search():
     if len(scores) > 0:
         top_score = scores[0][1]
         if is_uploaded_image:
-            # Strict filter for uploaded images (85% of top score)
-            min_score_threshold = top_score * 0.85
-            print(f"Using strict threshold for uploaded image: {min_score_threshold:.4f}")
+            # Strict filter for uploaded images
+            # Use BOTH absolute minimum (0.50) AND relative threshold (85% of top score)
+            # This prevents showing results when there's no real match
+            absolute_min = 0.50
+            relative_threshold = top_score * 0.85
+            min_score_threshold = max(absolute_min, relative_threshold)
+            print(f"Using strict threshold for uploaded image: {min_score_threshold:.4f} (absolute: {absolute_min}, relative: {relative_threshold:.4f})")
         else:
             # Relaxed filter for sample images (50% of top score)
             min_score_threshold = max(0.3, top_score * 0.5)
@@ -182,6 +186,14 @@ def search():
     # Get query image
     query_image_b64 = image_to_base64(query_path)
     
+    # If no results meet the threshold, return a helpful message
+    if len(results) == 0 and len(scores) > 0:
+        return jsonify({
+            'query_image': query_image_b64,
+            'results': [],
+            'message': f'No matching videos found. Best similarity score was {scores[0][1]:.4f}, which is below the threshold of {min_score_threshold:.4f}.'
+        })
+    
     return jsonify({
         'query_image': query_image_b64,
         'results': results
@@ -192,10 +204,15 @@ def play_video(video_name, frame_number):
     # Calculate timestamp (assuming 1 fps extraction rate)
     timestamp = frame_number - 1  # Frame 1 is at 0 seconds
     
+    # Get video URL from database (Cloudinary or local)
+    from db_utils import get_video_url
+    video_url = get_video_url(video_name)
+    
     return render_template('video_player.html', 
                          video_name=video_name, 
                          timestamp=timestamp,
-                         frame_number=frame_number)
+                         frame_number=frame_number,
+                         video_url=video_url)
 
 
 @app.route('/get_sample_images')

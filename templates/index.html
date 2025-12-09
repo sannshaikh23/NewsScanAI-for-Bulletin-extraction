@@ -301,6 +301,33 @@
             const resultsGrid = document.getElementById('resultsGrid');
             resultsGrid.innerHTML = '';
 
+            // Check if there's a message (no matches found)
+            if (data.message) {
+                resultsGrid.innerHTML = `
+                    <div style="
+                        padding: 60px 40px; 
+                        text-align: center; 
+                        grid-column: 1 / -1;
+                        background: linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%);
+                        border-radius: 12px;
+                        border: 2px solid #ffcccc;
+                        margin: 20px;
+                    ">
+                        <div style="font-size: 48px; margin-bottom: 20px;">⚠️</div>
+                        <h3 style="
+                            color: #d63031; 
+                            font-size: 24px;
+                            font-weight: 600;
+                            margin: 0;
+                            font-family: Arial, sans-serif;
+                        ">No Matching Videos Found</h3>
+                    </div>
+                `;
+                document.getElementById('resultsContainer').classList.remove('hidden');
+                return;
+            }
+
+            // Display results if found
             data.results.forEach((result, index) => {
                 const item = document.createElement('div');
                 item.className = 'result-item';
