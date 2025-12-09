@@ -1,0 +1,45 @@
+# Virtual environment
+.venv/
+venv/
+ENV/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Work directory (HUGE)
+work_dir/
+
+# Static images
+static/
+*.jpg
+*.jpeg
+*.png
+*.gif
+
+# Keyframes or extracted frames
+keyframes/
+frames/
+
+# Agent/cache
+.agent/
+
+# Databases
+*.db
+*.sqlite
+
+# Temp files
+*.tmp
+*.log
+
+# Videos
+*.mp4
+*.avi
+*.mkv
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git itself
+.git/
